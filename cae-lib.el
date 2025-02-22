@@ -69,5 +69,29 @@
   (unwind-protect (apply oldfun args)
     (advice-remove #'message #'ignore)))
 
+;; Add timers in an idempotent way.
+(defvar cae--timers (make-hash-table :test #'equal)
+  "Hash table storing active timers by unique name.")
+
+(defun cae-run-with-idle-timer (seconds repeat name function &rest args)
+  "Run an idle timer in an idempotent way.
+SECONDS, REPEAT, FUNCTION, and ARGS are passed to `run-with-idle-timer'.
+NAME is a unique identifier for the timer.
+If a timer with NAME already exists, cancel it before creating a new one."
+  (when-let ((existing (gethash name cae--timers)))
+    (cancel-timer existing))
+  (puthash name (apply #'run-with-idle-timer seconds repeat function args)
+           cae--timers))
+
+(defun cae-run-with-timer (seconds repeat name function &rest args)
+  "Run a timer in an idempotent way.
+SECONDS, REPEAT, FUNCTION, and ARGS are passed to `run-with-timer'.
+NAME is a unique identifier for the timer.
+If a timer with NAME already exists, cancel it before creating a new one."
+  (when-let ((existing (gethash name cae--timers)))
+    (cancel-timer existing))
+  (puthash name (apply #'run-with-timer seconds repeat function args)
+           cae--timers))
+
 (provide 'cae-lib)
 ;;; cae-lib.el ends here
