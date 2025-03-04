@@ -9,7 +9,7 @@
 ;; Version: 0.0.1
 ;; Keywords: internal extensions
 ;; Homepage: https://github.com/LemonBreezes/cae-lib
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "24.4"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -20,6 +20,8 @@
 ;;; Code:
 
 ;;; lisp/cae-lib.el -*- lexical-binding: t; -*-
+
+(defvar cae-config-finished-loading nil)
 
 (defun cae-ignore-errors-a (fun &rest args)
   "Ignore errors in FUN with ARGS."
@@ -165,7 +167,8 @@ SYMBOL, ARGLIST, DOCSTRING and BODY are as in `defadvice!`."
        (dolist (targets (list ,@(nreverse where-alist)))
          (dolist (target (cdr targets))
            ;; Remove any existing cae- advices
-           (cae-remove-cae-advices target)
+           (when cae-config-finished-loading
+             (cae-remove-cae-advices target))
 
            ;; Add the new advice
            (advice-add target (car targets) #',symbol))))))
@@ -177,7 +180,8 @@ HOW determines the position of the advice.
 FUNCTION is the advice function.
 PROPS is a plist of properties."
   ;; First, remove any existing cae- advices
-  (cae-remove-cae-advices symbol)
+  (when cae-config-finished-loading
+    (cae-remove-cae-advices symbol))
 
   ;; Then add the new advice
   (advice-add symbol how function props))
