@@ -108,5 +108,79 @@ If a timer with NAME already exists, cancel it before creating a new one."
     1)
    (t 0)))
 
+(defun cae-remove-cae-advices (symbol)
+  "Remove all advices with the 'cae-' prefix from function SYMBOL."
+  (let ((removed 0))
+    (advice-mapc
+     (lambda (advice-function properties)
+       (let ((name (alist-get 'name properties)))
+         (when (and name
+                    (symbolp name)
+                    (string-prefix-p "cae-" (symbol-name name)))
+           (advice-remove symbol name)
+           (setq removed (1+ removed)))))
+     symbol)
+    removed))
+
+(defun cae-remove-cae-advices (symbol &optional new-advice-name)
+  "Remove all advices with the 'cae-' prefix from function SYMBOL.
+Only show messages when removing advice names different from NEW-ADVICE-NAME."
+  (let (cae-advices)
+    ;; First, collect all the "cae-" prefixed advices
+    (advice-mapc
+     (lambda (advice-function properties)
+       (let ((name (or (alist-get 'name properties) advice-function)))
+         (when (and (symbolp name)
+                    (string-prefix-p "cae-" (symbol-name name)))
+           (push name cae-advices))))
+     symbol)
+
+    ;; Then remove each one
+    (dolist (advice cae-advices)
+      ;; Only message if the advice name is different from new-advice-name
+      (when (or (not new-advice-name)
+                (not (equal advice new-advice-name)))
+        (message "Removing advice %S from %S" advice symbol))
+      (advice-remove symbol advice))
+
+    ;; Return the list of removed advices
+    cae-advices))
+
+(defmacro cae-defadvice! (symbol arglist &optional docstring &rest body)
+  "Like `defadvice!` but removes any existing cae- prefixed advices first.
+SYMBOL, ARGLIST, DOCSTRING and BODY are as in `defadvice!`."
+  (declare (doc-string 3) (indent defun))
+  (unless (stringp docstring)
+    (push docstring body)
+    (setq docstring nil))
+  (let (where-alist)
+    (while (keywordp (car body))
+      (push `(cons ,(pop body) (ensure-list ,(pop body)))
+            where-alist))
+    `(progn
+       ;; Define the function
+       (defun ,symbol ,arglist ,docstring ,@body)
+
+       ;; For each target function, first remove cae- advices, then add the new one
+       (dolist (targets (list ,@(nreverse where-alist)))
+         (dolist (target (cdr targets))
+           ;; Remove any existing cae- advices
+           (cae-remove-cae-advices target)
+
+           ;; Add the new advice
+           (advice-add target (car targets) #',symbol))))))
+
+(defun cae-advice-add (symbol how function &optional props)
+  "Like `advice-add` but removes any existing cae- prefixed advices first.
+SYMBOL is the function to advise.
+HOW determines the position of the advice.
+FUNCTION is the advice function.
+PROPS is a plist of properties."
+  ;; First, remove any existing cae- advices
+  (cae-remove-cae-advices symbol)
+
+  ;; Then add the new advice
+  (advice-add symbol how function props))
+
 (provide 'cae-lib)
 ;;; cae-lib.el ends here
