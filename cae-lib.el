@@ -168,5 +168,8 @@ PROPS is a plist of properties."
   ;; Then add the new advice
   (advice-add symbol how function props))
 
+(defalias 'cae-advice-remove 'advice-remove)
+(defalias 'cae-undefadvice! 'undefadvice!)
+
 (provide 'cae-lib)
 ;;; cae-lib.el ends here
