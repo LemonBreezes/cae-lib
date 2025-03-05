@@ -159,7 +159,7 @@ SYMBOL, ARGLIST, DOCSTRING and BODY are as in `defadvice!`."
          (dolist (target (cdr targets))
            ;; Remove any existing cae- advices
            (when cae-config-finished-loading
-             (cae-remove-cae-advices target))
+             (cae-remove-cae-advices target ',symbol))
 
            ;; Add the new advice
            (advice-add target (car targets) #',symbol))))))
@@ -172,7 +172,10 @@ FUNCTION is the advice function.
 PROPS is a plist of properties."
   ;; First, remove any existing cae- advices
   (when cae-config-finished-loading
-    (cae-remove-cae-advices symbol))
+    (let ((advice-name (if (and props (plist-get props :name))
+                          (plist-get props :name)
+                        function)))
+      (cae-remove-cae-advices symbol advice-name)))
 
   ;; Then add the new advice
   (advice-add symbol how function props))
