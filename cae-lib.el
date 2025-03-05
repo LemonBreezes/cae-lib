@@ -124,18 +124,6 @@ If NEW-ADVICE-NAME is provided, also print a message about the new advice being 
            (push name cae-advices))))
      symbol)
 
-    ;; Then remove each one
-    (dolist (advice cae-advices)
-      ;; Only message if the advice name is different from new-advice-name
-      (when (or (not new-advice-name)
-                (not (equal advice new-advice-name)))
-        (message "Removing advice %S from %S" advice symbol))
-      (advice-remove symbol advice))
-    
-    ;; Print message about the new advice being added
-    (when new-advice-name
-      (message "Adding advice %S to %S" new-advice-name symbol))
-
     ;; Return the list of removed advices
     cae-advices))
 
