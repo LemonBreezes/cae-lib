@@ -105,28 +105,15 @@ If a timer with NAME already exists, cancel it before creating a new one."
    ;; Linux virtual console (tty). The TERM variable is usually "linux"
    ((string-prefix-p "/dev/tty" (terminal-name))
     0)
-   ;; Otherwise, if LANG indicates UTF-8 you’re probably in a modern terminal emulator.
+   ;; Otherwise, if LANG indicates UTF-8 you're probably in a modern terminal emulator.
    ((and (getenv "LANG") (string-match "utf8" (getenv "LANG")))
     1)
    (t 0)))
 
-(defun cae-remove-cae-advices (symbol)
-  "Remove all advices with the 'cae-' prefix from function SYMBOL."
-  (let ((removed 0))
-    (advice-mapc
-     (lambda (advice-function properties)
-       (let ((name (alist-get 'name properties)))
-         (when (and name
-                    (symbolp name)
-                    (string-prefix-p "cae-" (symbol-name name)))
-           (advice-remove symbol name)
-           (setq removed (1+ removed)))))
-     symbol)
-    removed))
-
 (defun cae-remove-cae-advices (symbol &optional new-advice-name)
   "Remove all advices with the 'cae-' prefix from function SYMBOL.
-Only show messages when removing advice names different from NEW-ADVICE-NAME."
+Only show messages when removing advice names different from NEW-ADVICE-NAME.
+If NEW-ADVICE-NAME is provided, also print a message about the new advice being added."
   (let (cae-advices)
     ;; First, collect all the "cae-" prefixed advices
     (advice-mapc
@@ -144,6 +131,10 @@ Only show messages when removing advice names different from NEW-ADVICE-NAME."
                 (not (equal advice new-advice-name)))
         (message "Removing advice %S from %S" advice symbol))
       (advice-remove symbol advice))
+    
+    ;; Print message about the new advice being added
+    (when new-advice-name
+      (message "Adding advice %S to %S" new-advice-name symbol))
 
     ;; Return the list of removed advices
     cae-advices))
