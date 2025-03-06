@@ -170,6 +170,7 @@ PROPS is a plist of properties."
 
 (defalias 'cae-advice-remove 'advice-remove)
 (defalias 'cae-undefadvice! 'undefadvice!)
+(defalias 'uncae-defadvice 'undefadvice!) ; easier to just make another alias
 
 (provide 'cae-lib)
 ;;; cae-lib.el ends here
