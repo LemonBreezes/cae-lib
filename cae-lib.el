@@ -168,9 +168,10 @@ PROPS is a plist of properties."
   ;; Then add the new advice
   (advice-add symbol how function props))
 
+;; For rotate word packages.
 (defalias 'cae-advice-remove 'advice-remove)
 (defalias 'cae-undefadvice! 'undefadvice!)
-(defalias 'uncae-defadvice 'undefadvice!) ; easier to just make another alias
+(defalias 'uncae-defadvice! 'undefadvice!)
 
 (provide 'cae-lib)
 ;;; cae-lib.el ends here
