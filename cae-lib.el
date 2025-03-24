@@ -110,6 +110,12 @@ If a timer with NAME already exists, cancel it before creating a new one."
     1)
    (t 0)))
 
+(defun cae-running-in-ssh-p ()
+  "Return non-nil if Emacs is running within an SSH session."
+  (or (getenv "SSH_CLIENT")
+      (getenv "SSH_TTY")
+      (getenv "SSH_CONNECTION")))
+
 (defun cae-remove-cae-advices (symbol &optional new-advice-name)
   "Remove all advices with the 'cae-' prefix from function SYMBOL.
 Only show messages when removing advice names different from NEW-ADVICE-NAME.
