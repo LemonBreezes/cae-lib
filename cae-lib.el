@@ -20,7 +20,6 @@
 ;;; Code:
 
 ;;; lisp/cae-lib.el -*- lexical-binding: t; -*-
-
 (defvar cae-config-finished-loading nil)
 
 (defun cae-ignore-errors-a (fun &rest args)
@@ -64,10 +63,6 @@
   (cl-letf (((symbol-function #'yes-or-no-p) (symbol-function #'always))
             ((symbol-function #'y-or-n-p) (symbol-function #'always)))
     (apply oldfun args)))
-
-;; For shutting up noisy functions.
-(defun cae-shut-up-a (oldfun &rest args)
-  (quiet!! (apply oldfun args)))
 
 ;; Add timers in an idempotent way.
 (defvar cae--timers (make-hash-table :test #'equal)
