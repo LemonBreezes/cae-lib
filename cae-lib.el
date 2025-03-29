@@ -67,9 +67,7 @@
 
 ;; For shutting up noisy functions.
 (defun cae-shut-up-a (oldfun &rest args)
-  (advice-add #'message :override #'ignore)
-  (unwind-protect (apply oldfun args)
-    (advice-remove #'message #'ignore)))
+  (quiet!! (apply oldfun args)))
 
 ;; Add timers in an idempotent way.
 (defvar cae--timers (make-hash-table :test #'equal)
