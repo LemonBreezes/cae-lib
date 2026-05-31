@@ -172,5 +172,25 @@ PROPS is a plist of properties."
 (defalias 'cae-undefadvice! 'undefadvice!)
 (defalias 'uncae-defadvice! 'undefadvice!)
 
+(defun cae-wm-name ()
+  "Return the running window manager's EWMH name, or nil.
+Reads `_NET_WM_NAME' of the window pointed to by the root
+`_NET_SUPPORTING_WM_CHECK' property.  This works regardless of how
+Emacs was launched, so it does not depend on session env vars like
+`XDG_CURRENT_DESKTOP' (which are empty under a bare `xinit' session,
+e.g. StumpWM)."
+  (when (eq 'x (framep (selected-frame)))
+    (let ((id (x-window-property "_NET_SUPPORTING_WM_CHECK" nil "WINDOW" 0 nil t)))
+      (when (integerp id)
+        ;; Some WMs only set the legacy STRING property (e.g. StumpWM, which
+        ;; leaves UTF8_STRING empty), others use UTF8_STRING (e.g. EXWM); try
+        ;; both and skip empty values.
+        (cl-some (lambda (type)
+                   (let ((name (x-window-property "_NET_WM_NAME" nil type id nil t)))
+                     (and (stringp name) (not (string-empty-p name))
+                          (substring-no-properties name))))
+                 '("UTF8_STRING" "STRING"))))))
+
+
 (provide 'cae-lib)
 ;;; cae-lib.el ends here
